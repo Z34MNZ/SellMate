@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "sellmate-ac172",
+    "staging": "sellmate-ac172"
+  },
+  "targets": {},
+  "etags": {}
+}
