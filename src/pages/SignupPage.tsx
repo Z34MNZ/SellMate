@@ -7,6 +7,9 @@ import { Card } from "@/components/ui/card";
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { auth, db } from "@/lib/firebase";
+import { doc, updateDoc } from "firebase/firestore";
+import { toast } from "sonner";
 
 const SignupPage = () => {
   const [step, setStep] = useState<"form" | "role">("form");
@@ -26,12 +29,20 @@ const SignupPage = () => {
   };
 
   // Called after role selection
-  const handleRoleSelect = (role: string) => {
+  const handleRoleSelect = async (role: string) => {
     setSignupRole(role as "buyer" | "seller" | "middleman");
-    if (role === "buyer") {
-      navigate("/dashboard/buyer");
-    } else if (role === "seller") {
-      navigate("/dashboard/seller");
+    if (role === "buyer" || role === "seller") {
+      try {
+        if (auth.currentUser) {
+          const userRef = doc(db, "users", auth.currentUser.uid);
+          await updateDoc(userRef, { role });
+          toast.success(`Successfully set role as ${role}`);
+          navigate(`/dashboard/${role}`);
+        }
+      } catch (error) {
+        console.error("Error updating user role:", error);
+        toast.error("Failed to update user role");
+      }
     } else if (role === "middleman") {
       setShowMiddlemanDialog(true);
     }
@@ -48,9 +59,9 @@ const SignupPage = () => {
 
   return (
     <AuthLayout
-      title={step === "form" ? "Sign Up" : "Sign Up"}
+      title={"Sign Up"}
       subtitle={step === "form" ? "" : "Select your role to create an account"}
-      className="bg-gradient-to-r from-blue-50 to-indigo-50"
+      className="bg-white"
       showBackLink={true}
       backLinkUrl="/"
       backLinkText=""
@@ -67,13 +78,16 @@ const SignupPage = () => {
         </>
       ) : (
         <>
+          <div style={{ color: '#5B3FFF', fontWeight: 800, fontSize: '2.2rem', textAlign: 'center', marginBottom: '2rem' }}>
+            Choose the role you want to continue
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8 max-w-3xl mx-auto">
             {[
               {
                 role: "buyer",
                 bg: "bg-blue-50",
                 iconBg: "bg-blue-500",
-                icon: <ShoppingBag size={24} />, 
+                icon: <ShoppingBag size={32} color="#fff" />, 
                 title: "Buyer",
                 titleColor: "text-blue-600",
                 desc: "Find trusted middlemen to help with your purchases",
@@ -83,7 +97,7 @@ const SignupPage = () => {
                 role: "seller",
                 bg: "bg-green-50",
                 iconBg: "bg-green-500",
-                icon: <Store size={24} />, 
+                icon: <Store size={32} color="#fff" />, 
                 title: "Seller",
                 titleColor: "text-green-600",
                 desc: "Sell your products with secure transaction support",
@@ -93,7 +107,7 @@ const SignupPage = () => {
                 role: "middleman",
                 bg: "bg-purple-50",
                 iconBg: "bg-purple-500",
-                icon: <UserCheck size={24} />, 
+                icon: <UserCheck size={32} color="#fff" />, 
                 title: "Middleman",
                 titleColor: "text-purple-600",
                 desc: "Facilitate safe exchanges between buyers and sellers",
@@ -110,12 +124,13 @@ const SignupPage = () => {
                   className={`hover:scale-105 transition-transform duration-200 h-full ${card.locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   onClick={() => !card.locked ? handleRoleSelect(card.role) : setShowMiddlemanDialog(true)}
                 >
-                  <Card className={`overflow-hidden ${card.bg} border-none hover:shadow-md transition-all h-full`}>
+                  <Card className={`overflow-hidden ${card.bg} border-none hover:shadow-md transition-all h-full`} style={{ boxShadow: '0 2px 12px 0 rgba(91,63,255,0.06)' }}>
                     <div className="p-6 flex flex-col items-center text-center">
                       <motion.div
-                        className={`${card.iconBg} text-white rounded-full p-4 mb-4`}
+                        className={`${card.iconBg} text-white rounded-full p-4 mb-4 flex items-center justify-center`}
                         animate={{ y: [0, -10, 0] }}
                         transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut", delay: 0.1 * i }}
+                        style={{ background: card.iconBg }}
                       >
                         {card.icon}
                       </motion.div>

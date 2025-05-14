@@ -2,10 +2,13 @@ import React from 'react';
 import { NavBar } from "@/components/NavBar";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Store, ArrowLeft, Plus, Edit, Trash2 } from "lucide-react";
+import { Store, ArrowLeft, Plus, Edit, Trash2, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Product {
   id: string;
@@ -17,6 +20,14 @@ interface Product {
 
 const ProductsPage = () => {
   const navigate = useNavigate();
+  const [showAddModal, setShowAddModal] = React.useState(false);
+  const [newProduct, setNewProduct] = React.useState({
+    name: '',
+    price: '',
+    category: '',
+    status: 'active',
+    description: '',
+  });
 
   const products: Product[] = [
     {
@@ -61,6 +72,13 @@ const ProductsPage = () => {
     }
   };
 
+  const handleAddProduct = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Here you would add logic to save the product to Firestore or backend
+    setShowAddModal(false);
+    setNewProduct({ name: '', price: '', category: '', status: 'active', description: '' });
+  };
+
   return (
     <div className="page-container">
       <NavBar userType="seller" />
@@ -76,11 +94,17 @@ const ProductsPage = () => {
           </div>
 
           <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Manage Your Product Catalog</CardTitle>
-              <CardDescription>
-                Add, edit, and organize your product listings
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Manage Your Product Catalog</CardTitle>
+                <CardDescription>
+                  Add, edit, and organize your product listings
+                </CardDescription>
+              </div>
+              <Button variant="default" onClick={() => setShowAddModal(true)} className="flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                Add Product
+              </Button>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="all" className="w-full">
@@ -110,6 +134,62 @@ const ProductsPage = () => {
               </Tabs>
             </CardContent>
           </Card>
+
+          {/* Add Product Modal */}
+          <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+            <DialogContent className="sm:max-w-lg rounded-2xl p-0 overflow-hidden">
+              {/* Gradient bar at the top */}
+              <div style={{ height: '8px', width: '100%', background: 'linear-gradient(90deg, #3B82F6 0%, #9333EA 100%)' }} />
+              <div className="flex flex-col items-center px-8 py-8">
+                {/* Gradient Icon */}
+                <div className="rounded-full mb-4 flex items-center justify-center" style={{ width: 48, height: 48, background: 'linear-gradient(135deg, #3B82F6 0%, #9333EA 100%)' }}>
+                  <Briefcase size={28} color="#fff" />
+                </div>
+                {/* Heading */}
+                <div className="text-2xl font-extrabold text-gray-900 mb-2 text-center">Add New Product</div>
+                <div className="text-gray-500 mb-6 text-center">Fill in the details below to add a new product to your store.</div>
+                <form onSubmit={handleAddProduct} className="space-y-5 w-full">
+                  <div>
+                    <label className="block text-base font-semibold mb-1 text-gray-800">Product Name</label>
+                    <Input
+                      placeholder="Product Name"
+                      value={newProduct.name}
+                      onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
+                      required
+                      className="rounded-xl border-2 border-transparent focus:border-blue-500 focus:ring-0 text-base px-4 py-3 bg-gray-50 shadow-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-base font-semibold mb-1 text-gray-800">Description</label>
+                    <textarea
+                      placeholder="Description"
+                      value={newProduct.description || ''}
+                      onChange={e => setNewProduct({ ...newProduct, description: e.target.value })}
+                      required
+                      className="rounded-xl border-2 border-transparent focus:border-blue-500 focus:ring-0 text-base px-4 py-3 bg-gray-50 w-full min-h-[80px] shadow-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-base font-semibold mb-1 text-gray-800">Price</label>
+                    <Input
+                      placeholder="Price"
+                      type="number"
+                      min="0"
+                      value={newProduct.price}
+                      onChange={e => setNewProduct({ ...newProduct, price: e.target.value })}
+                      required
+                      className="rounded-xl border-2 border-transparent focus:border-blue-500 focus:ring-0 text-base px-4 py-3 bg-gray-50 shadow-sm"
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" className="w-full h-12 rounded-xl text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-500 hover:from-blue-700 hover:to-purple-600 border-0 shadow-none">
+                      Add Product
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </main>
       <footer className="bg-gray-100 py-4 text-center text-sm text-gray-600">

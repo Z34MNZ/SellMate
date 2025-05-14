@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavBar } from "@/components/NavBar";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CreditCard, ArrowLeft, Check, Plus, Trash2, Edit, AlertCircle } from "lucide-react";
+import { CreditCard, ArrowLeft, Check, Plus, Trash2, Edit, AlertCircle, UserCheck, XCircle, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
@@ -38,6 +38,41 @@ const PaymentMethodsPage = () => {
     accountNumber: '',
   });
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [showSetupModal, setShowSetupModal] = useState(false);
+  const [setupStep, setSetupStep] = useState(0);
+
+  const setupSteps = [
+    {
+      icon: <CreditCard size={64} color="#3B82F6" />,
+      heading: "Welcome to Payment Setup!",
+      subtitle: "Easily configure your payment methods to transact with middlemen. Let's get started!"
+    },
+    {
+      icon: <CreditCard size={64} color="#3B82F6" />,
+      heading: "Select a Payment Method",
+      subtitle: "Choose from GCash, Paymaya, or GOtyme by clicking on the card."
+    },
+    {
+      icon: <UserCheck size={64} color="#3B82F6" />,
+      heading: "Add Account Details",
+      subtitle: "Click 'Add Account', then enter your account name and number for the selected method."
+    },
+    {
+      icon: <Check size={64} color="#22c55e" />,
+      heading: "Set as Default (Optional)",
+      subtitle: "Mark your preferred account as default for faster transactions."
+    },
+    {
+      icon: <XCircle size={64} color="#ef4444" />,
+      heading: "Save and Confirm",
+      subtitle: "Click 'Save' to add your payment method. You can manage or remove accounts anytime."
+    },
+    {
+      icon: <Check size={64} color="#22c55e" />,
+      heading: "Ready to Transact!",
+      subtitle: "Use your saved payment methods to pay or receive funds from middlemen securely."
+    },
+  ];
 
   const paymentMethods: PaymentMethod[] = [
     {
@@ -136,6 +171,40 @@ const PaymentMethodsPage = () => {
             <h1 className="text-3xl font-bold">Payment Methods</h1>
           </div>
           
+          <Dialog open={showSetupModal} onOpenChange={setShowSetupModal}>
+            <DialogContent className="max-w-md bg-blue-50 rounded-2xl p-0">
+              <div className="flex flex-col items-center px-8 py-8">
+                {/* Progress Dots */}
+                <div className="flex items-center justify-center gap-2 mb-6">
+                  {setupSteps.map((_, idx) => (
+                    <span key={idx} className={`w-3 h-3 rounded-full ${idx === setupStep ? 'bg-blue-500' : 'bg-blue-200'}`}></span>
+                  ))}
+                </div>
+                {/* Icon */}
+                <div className="mb-4 flex items-center justify-center">
+                  {setupSteps[setupStep].icon}
+                </div>
+                {/* Heading */}
+                <div className="text-2xl font-extrabold text-blue-700 mb-2 text-center">{setupSteps[setupStep].heading}</div>
+                <div className="text-blue-600 mb-8 text-center">{setupSteps[setupStep].subtitle}</div>
+                <div className="flex justify-between w-full mt-4">
+                  <Button variant="ghost" className="text-blue-600" disabled={setupStep === 0} onClick={() => setSetupStep(s => Math.max(0, s - 1))}>
+                    ← Back
+                  </Button>
+                  {setupStep < setupSteps.length - 1 ? (
+                    <Button className="rounded-xl px-8 text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-400" onClick={() => setSetupStep(s => Math.min(setupSteps.length - 1, s + 1))}>
+                      Next →
+                    </Button>
+                  ) : (
+                    <Button className="rounded-xl px-8 text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-400" onClick={() => setShowSetupModal(false)}>
+                      Finish
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
               <CardContent className="p-6">
@@ -147,7 +216,7 @@ const PaymentMethodsPage = () => {
                       Configure your payment methods to easily transact with middlemen
                     </p>
                     <div className="mt-4">
-                      <Button variant="secondary" size="sm" className="bg-white text-blue-600 hover:bg-blue-50">
+                      <Button variant="secondary" size="sm" className="bg-white text-blue-600 hover:bg-blue-50" onClick={() => { setShowSetupModal(true); setSetupStep(0); }}>
                         Learn More
                       </Button>
                     </div>
@@ -176,27 +245,26 @@ const PaymentMethodsPage = () => {
                 </TabsList>
 
                 <TabsContent value="all" className="mt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 place-items-center">
                     {paymentMethods.map((method) => (
-                      <Card 
+                      <div
                         key={method.id}
-                        className={`cursor-pointer transition-all hover:shadow-lg transform hover:-translate-y-1 
-                        ${selectedMethod === method.id ? 'border-blue-500 ring-2 ring-blue-300 shadow-md' : 'hover:border-blue-300'}`}
+                        className={`relative w-[340px] h-[280px] flex flex-col items-center justify-center bg-white rounded-2xl shadow-md border transition-all duration-200 cursor-pointer ${selectedMethod === method.id ? 'border-2 border-blue-500' : 'border border-gray-200 hover:border-blue-300'}`}
                         onClick={() => handleSelectMethod(method.id)}
+                        style={{ boxSizing: 'border-box' }}
                       >
-                        <div className="p-6 flex flex-col items-center text-center gap-4">
-                          <div className="relative">
-                            <img src={method.icon} alt={method.name + ' logo'} className="h-12 w-12 object-contain" />
-                            {selectedMethod === method.id && (
-                              <div className="absolute -top-2 -right-2 bg-blue-500 text-white rounded-full p-1">
-                                <Check className="h-3 w-3" />
-                              </div>
-                            )}
-                          </div>
-                          <h2 className="text-xl font-semibold">{method.name}</h2>
-                          <p className="text-gray-600 text-sm">{method.description}</p>
-                        </div>
-                      </Card>
+                        {/* Blue checkmark for selected */}
+                        {selectedMethod === method.id && (
+                          <span className="absolute top-4 right-4 z-10">
+                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-500">
+                              <CheckCircle className="h-5 w-5 text-white" />
+                            </span>
+                          </span>
+                        )}
+                        <img src={method.icon} alt={method.name + ' logo'} className="h-12 w-12 object-contain mb-4" style={{ marginTop: selectedMethod === method.id ? '12px' : '24px' }} />
+                        <h2 className="text-2xl font-bold mb-2 text-center" style={{ letterSpacing: 0 }}>{method.name}</h2>
+                        <p className="text-gray-600 text-base text-center max-w-xs">{method.description}</p>
+                      </div>
                     ))}
                   </div>
                 </TabsContent>

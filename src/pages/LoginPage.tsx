@@ -28,9 +28,9 @@ const LoginPage = () => {
 
   return (
     <AuthLayout
-      title={step === "form" ? "Login" : "Login"}
+      title={"Login"}
       subtitle={step === "form" ? "" : "Select your role to login to your account"}
-      className="bg-gradient-to-r from-blue-50 to-indigo-50"
+      className="bg-white"
       showBackLink={true}
       backLinkUrl="/"
       backLinkText=""
@@ -47,13 +47,16 @@ const LoginPage = () => {
         </>
       ) : (
         <>
+          <div style={{ color: '#5B3FFF', fontWeight: 800, fontSize: '2.2rem', textAlign: 'center', marginBottom: '2rem' }}>
+            Choose the role you want to continue
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8 max-w-3xl mx-auto">
             {[
               {
                 role: "buyer",
                 bg: "bg-blue-50",
                 iconBg: "bg-blue-500",
-                icon: <ShoppingBag size={24} />, 
+                icon: <ShoppingBag size={32} color="#fff" />, 
                 title: "Buyer",
                 titleColor: "text-blue-600",
                 desc: "Access your buyer account"
@@ -62,7 +65,7 @@ const LoginPage = () => {
                 role: "seller",
                 bg: "bg-green-50",
                 iconBg: "bg-green-500",
-                icon: <Store size={24} />, 
+                icon: <Store size={32} color="#fff" />, 
                 title: "Seller",
                 titleColor: "text-green-600",
                 desc: "Access your seller dashboard"
@@ -71,7 +74,7 @@ const LoginPage = () => {
                 role: "middleman",
                 bg: "bg-purple-50",
                 iconBg: "bg-purple-500",
-                icon: <UserCheck size={24} />, 
+                icon: <UserCheck size={32} color="#fff" />, 
                 title: "Middleman",
                 titleColor: "text-purple-600",
                 desc: "Access your middleman account"
@@ -83,13 +86,14 @@ const LoginPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.1 * i, type: 'spring' }}
               >
-                <div className="hover:scale-105 transition-transform duration-200 cursor-pointer h-full" onClick={() => handleRoleSelect(card.role)}>
-                  <Card className={`overflow-hidden ${card.bg} border-none hover:shadow-md transition-all h-full`}>
+                <div className={`hover:scale-105 transition-transform duration-200 cursor-pointer h-full`} onClick={() => handleRoleSelect(card.role)}>
+                  <Card className={`overflow-hidden ${card.bg} border-none hover:shadow-md transition-all h-full`} style={{ boxShadow: '0 2px 12px 0 rgba(91,63,255,0.06)' }}>
                     <div className="p-6 flex flex-col items-center text-center">
                       <motion.div
-                        className={`${card.iconBg} text-white rounded-full p-4 mb-4`}
+                        className={`${card.iconBg} text-white rounded-full p-4 mb-4 flex items-center justify-center`}
                         animate={{ y: [0, -10, 0] }}
                         transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut", delay: 0.1 * i }}
+                        style={{ background: card.iconBg }}
                       >
                         {card.icon}
                       </motion.div>

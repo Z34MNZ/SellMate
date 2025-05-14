@@ -1,6 +1,6 @@
 import { NavBar } from "@/components/NavBar";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { ShoppingBag, Package, CreditCard, UserCheck, MessageCircle, Eye } from "lucide-react";
+import { ShoppingBag, Package, CreditCard, UserCheck, MessageCircle, Eye, Clock, Briefcase } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -165,68 +165,86 @@ const BuyerDashboard = () => {
             </Tabs>
           </Card>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Order Details</DialogTitle>
-              </DialogHeader>
-              {selectedOrder && (
-                <div className="space-y-2">
-                  <div><strong>Order Number:</strong> {selectedOrder.orderNumber}</div>
-                  <div><strong>Date:</strong> {new Date(selectedOrder.date).toLocaleDateString()}</div>
-                  <div><strong>Status:</strong> {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}</div>
-                  <div><strong>Amount:</strong> ₱{selectedOrder.total.toFixed(2)}</div>
-                  <div><strong>Items:</strong> {selectedOrder.items}</div>
+            <DialogContent className="max-w-md bg-gradient-to-b from-blue-50 to-white rounded-2xl p-0">
+              <div className="flex flex-col items-center px-8 py-8">
+                {/* Top Icon */}
+                <div className="rounded-full bg-blue-600 flex items-center justify-center mb-4" style={{ width: 64, height: 64 }}>
+                  <Clock size={36} color="#FFD600" />
                 </div>
-              )}
+                {/* Heading */}
+                <div className="text-2xl font-extrabold text-blue-700 mb-6 text-center">Order Details</div>
+                {selectedOrder && (
+                  <div className="w-full space-y-3 mb-6">
+                    <div className="text-base"><span className="text-blue-700 font-semibold">Order Number:</span> <span className="text-black">{selectedOrder.orderNumber}</span></div>
+                    <div className="text-base"><span className="text-blue-700 font-semibold">Date:</span> <span className="text-black">{new Date(selectedOrder.date).toLocaleDateString()}</span></div>
+                    <div className="text-base flex items-center"><span className="text-blue-700 font-semibold">Status:</span> {selectedOrder.status === 'pending' ? <span className="ml-2 bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">Pending</span> : <span className="ml-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">Delivered</span>}</div>
+                    <div className="text-base"><span className="text-blue-700 font-semibold">Amount:</span> <span className="text-black">₱{selectedOrder.total.toFixed(2)}</span></div>
+                    <div className="text-base"><span className="text-blue-700 font-semibold">Items:</span> <span className="text-black">{selectedOrder.items}</span></div>
+                  </div>
+                )}
+                <Button className="w-full h-12 rounded-full text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-400 mt-2" onClick={() => setDialogOpen(false)}>
+                  Close
+                </Button>
+              </div>
             </DialogContent>
           </Dialog>
           <Dialog open={addProductOpen} onOpenChange={setAddProductOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Product</DialogTitle>
-              </DialogHeader>
-              <form className="space-y-4" onSubmit={handleProductFormSubmit}>
-                <div>
-                  <label className="block text-sm font-medium mb-1" htmlFor="product-name">Product Name</label>
-                  <input
-                    id="product-name"
-                    name="name"
-                    type="text"
-                    required
-                    className="w-full border rounded px-3 py-2"
-                    value={productForm.name}
-                    onChange={handleProductFormChange}
-                  />
+            <DialogContent className="sm:max-w-lg rounded-2xl p-0 overflow-hidden">
+              {/* Gradient bar at the top */}
+              <div style={{ height: '8px', width: '100%', background: 'linear-gradient(90deg, #3B82F6 0%, #9333EA 100%)' }} />
+              <div className="flex flex-col items-center px-8 py-8">
+                {/* Gradient Icon */}
+                <div className="rounded-full mb-4 flex items-center justify-center" style={{ width: 48, height: 48, background: 'linear-gradient(135deg, #3B82F6 0%, #9333EA 100%)' }}>
+                  <Briefcase size={28} color="#fff" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" htmlFor="product-description">Description</label>
-                  <textarea
-                    id="product-description"
-                    name="description"
-                    required
-                    className="w-full border rounded px-3 py-2"
-                    value={productForm.description}
-                    onChange={handleProductFormChange}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" htmlFor="product-price">Price</label>
-                  <input
-                    id="product-price"
-                    name="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    required
-                    className="w-full border rounded px-3 py-2"
-                    value={productForm.price}
-                    onChange={handleProductFormChange}
-                  />
-                </div>
-                <div className="flex justify-end">
-                  <Button type="submit">Add Product</Button>
-                </div>
-              </form>
+                {/* Heading */}
+                <div className="text-2xl font-extrabold text-gray-900 mb-2 text-center">Add New Product</div>
+                <div className="text-gray-500 mb-6 text-center">Fill in the details below to add a new product to your store.</div>
+                <form className="space-y-5 w-full" onSubmit={handleProductFormSubmit}>
+                  <div>
+                    <label className="block text-base font-semibold mb-1 text-gray-800" htmlFor="product-name">Product Name</label>
+                    <input
+                      id="product-name"
+                      name="name"
+                      type="text"
+                      required
+                      className="w-full rounded-xl border-2 border-transparent focus:border-blue-500 focus:ring-0 text-base px-4 py-3 bg-gray-50 shadow-sm"
+                      value={productForm.name}
+                      onChange={handleProductFormChange}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-base font-semibold mb-1 text-gray-800" htmlFor="product-description">Description</label>
+                    <textarea
+                      id="product-description"
+                      name="description"
+                      required
+                      className="w-full rounded-xl border-2 border-transparent focus:border-blue-500 focus:ring-0 text-base px-4 py-3 bg-gray-50 min-h-[80px] shadow-sm"
+                      value={productForm.description}
+                      onChange={handleProductFormChange}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-base font-semibold mb-1 text-gray-800" htmlFor="product-price">Price</label>
+                    <input
+                      id="product-price"
+                      name="price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      required
+                      className="w-full rounded-xl border-2 border-transparent focus:border-blue-500 focus:ring-0 text-base px-4 py-3 bg-gray-50 shadow-sm"
+                      value={productForm.price}
+                      onChange={handleProductFormChange}
+                    />
+                  </div>
+                  <div className="flex justify-end">
+                    <button type="submit" className="w-full h-12 rounded-xl text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-500 hover:from-blue-700 hover:to-purple-600 border-0 shadow-none text-white">
+                      Add Product
+                    </button>
+                  </div>
+                </form>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
