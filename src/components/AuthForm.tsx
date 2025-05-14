@@ -8,6 +8,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ForgotPasswordFlow } from "./ForgotPasswordFlow";
 import { PasswordInput } from "./auth/PasswordInput";
 import { IdDocumentUpload } from "./auth/IdDocumentUpload";
+import { auth, db } from "@/lib/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { setDoc, doc } from "firebase/firestore";
+import { useAuth } from "@/hooks/useAuth";
+
 interface AuthFormProps {
   type: "login" | "signup";
   role: "buyer" | "seller" | "middleman" | "admin";
@@ -35,6 +40,7 @@ export function AuthForm({
   const [expertise, setExpertise] = useState("");
   const [proofImage, setProofImage] = useState<File | null>(null);
   const navigate = useNavigate();
+  const { signIn } = useAuth();
 
   // Admin credentials
   const adminCredentials = {
@@ -81,7 +87,7 @@ export function AuthForm({
       toast.success(`Proof image "${e.target.files[0].name}" uploaded successfully`);
     }
   };
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     if (!email || !password) {
@@ -95,6 +101,18 @@ export function AuthForm({
         toast.success("Admin logged in successfully");
         navigate("/dashboard/admin");
       }, 1500);
+      return;
+    }
+    if (type === "login") {
+      try {
+        await signIn(email, password);
+        setIsLoading(false);
+        toast.success("Logged in successfully");
+        if (onSuccess) onSuccess({ name, email, password });
+      } catch (error: any) {
+        setIsLoading(false);
+        toast.error(error.message || "Failed to login");
+      }
       return;
     }
     if (type === "signup") {
@@ -125,17 +143,26 @@ export function AuthForm({
           return;
         }
       }
-    }
-    setTimeout(() => {
-      setIsLoading(false);
-      if (type === "login") {
-        toast.success("Logged in successfully");
-        if (onSuccess) onSuccess({ name, email, password });
-      } else {
+      try {
+        const res = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "users", res.user.uid), {
+          username: name,
+          email,
+          id: res.user.uid,
+          blocked: [],
+          role,
+          ...(role === "middleman" ? { expertise } : {})
+        });
+        setIsLoading(false);
         toast.success("Account created successfully");
         if (onSuccess) onSuccess({ name, email, password });
+        return;
+      } catch (error: any) {
+        setIsLoading(false);
+        toast.error(error.message || "Failed to create account");
+        return;
       }
-    }, 1500);
+    }
   };
   return <form onSubmit={handleSubmit} className="space-y-6">
       {type === "signup" && <div className="space-y-3">
